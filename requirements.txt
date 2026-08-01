@@ -1,0 +1,33 @@
+# ============================
+# Deep Learning Framework
+# ============================
+torch==2.8.0
+
+# ============================
+# Hugging Face Ecosystem
+# ============================
+transformers==4.56.1
+datasets==4.0.0
+sentencepiece==0.2.1
+accelerate==1.10.0
+evaluate==0.4.5
+rouge-score==0.1.2
+
+# ============================
+# Data Processing
+# ============================
+pandas==2.3.2
+numpy==2.3.2
+scikit-learn==1.7.1
+
+# ============================
+# Visualization
+# ============================
+matplotlib==3.10.5
+seaborn==0.13.2
+
+# ============================
+# Development
+# ============================
+jupyterlab==4.4.6
+tqdm==4.67.1
