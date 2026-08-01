@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from dataset import RadiologyDataset
+from src.dataset import RadiologyDataset
 
 dataset = RadiologyDataset(
     Path("data/processed/train.csv")

@@ -15,7 +15,7 @@ import torch
 from torch.utils.data import Dataset
 from transformers import AutoTokenizer
 
-from config import (
+from src.config import (
     MODEL_NAME,
     MAX_INPUT_LENGTH,
     MAX_TARGET_LENGTH,
@@ -97,10 +97,14 @@ class RadiologyDataset(Dataset):
 
         model_inputs = self.tokenize_input(findings)
 
-        labels = self.tokenize_target(impression)
+        target = self.tokenize_target(impression)
+
+        labels = target["input_ids"].squeeze(0)
+
+        labels[labels == self.tokenizer.pad_token_id] = -100
 
         return {
             "input_ids": model_inputs["input_ids"].squeeze(0),
             "attention_mask": model_inputs["attention_mask"].squeeze(0),
-            "labels": labels["input_ids"].squeeze(0),
+            "labels": labels,
         }
