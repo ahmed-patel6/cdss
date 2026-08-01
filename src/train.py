@@ -26,9 +26,9 @@ from src.config import (
     EVAL_STRATEGY,
     SAVE_TOTAL_LIMIT,
     LOAD_BEST_MODEL_AT_END,
-    PREDICT_WITH_GENERATE,
     METRIC_FOR_BEST_MODEL,
     GREATER_IS_BETTER,
+    RANDOM_SEED,
     GRADIENT_ACCUMULATION_STEPS,
     FP16,
 )
@@ -178,7 +178,7 @@ def create_training_arguments() -> TrainingArguments:
 
         logging_steps=LOGGING_STEPS,
 
-        evaluation_strategy=EVAL_STRATEGY,
+        eval_strategy=EVAL_STRATEGY,
 
         save_strategy=SAVE_STRATEGY,
 
@@ -189,8 +189,6 @@ def create_training_arguments() -> TrainingArguments:
         metric_for_best_model=METRIC_FOR_BEST_MODEL,
 
         greater_is_better=GREATER_IS_BETTER,
-
-        predict_with_generate=PREDICT_WITH_GENERATE,
 
         fp16=FP16,
 
