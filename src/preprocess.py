@@ -5,7 +5,8 @@ This module:
 1. Downloads the dataset from Hugging Face.
 2. Cleans the radiology reports.
 3. Removes invalid samples.
-4. Saves processed CSV files.
+4. Splits the training set into train and test (90:10).
+5. Saves processed CSV files.
 """
 
 from __future__ import annotations
@@ -14,13 +15,14 @@ import re
 
 import pandas as pd
 from datasets import DatasetDict, load_dataset
+from sklearn.model_selection import train_test_split
 
-from config import (
+from src.config import (
     DATASET_NAME,
     PROCESSED_DATA_DIR,
+    RANDOM_SEED,
 )
-import dataset
-from utils import create_directories, log_message
+from src.utils import create_directories, log_message
 
 
 def clean_text(text: str) -> str:
@@ -60,27 +62,56 @@ def preprocess_split(df: pd.DataFrame) -> pd.DataFrame:
         Clean dataframe.
     """
 
-    # Keep only required columns
     df = df[["findings", "impression"]].copy()
 
-    # Remove missing rows
     df = df.dropna()
 
-    # Clean text
     df["findings"] = df["findings"].apply(clean_text)
     df["impression"] = df["impression"].apply(clean_text)
 
-    # Remove empty strings
     df = df[
         (df["findings"] != "")
-        &
-        (df["impression"] != "")
+        & (df["impression"] != "")
     ]
 
     return df.reset_index(drop=True)
 
 
-def save_split(df: pd.DataFrame, filename: str) -> None:
+def split_train_test(
+    df: pd.DataFrame,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Split the processed training data into
+    train and test sets.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Clean training dataframe.
+
+    Returns
+    -------
+    tuple[pd.DataFrame, pd.DataFrame]
+        Train dataframe, Test dataframe.
+    """
+
+    train_df, test_df = train_test_split(
+        df,
+        test_size=0.10,
+        random_state=RANDOM_SEED,
+        shuffle=True,
+    )
+
+    return (
+        train_df.reset_index(drop=True),
+        test_df.reset_index(drop=True),
+    )
+
+
+def save_split(
+    df: pd.DataFrame,
+    filename: str,
+) -> None:
     """
     Save a processed dataframe.
 
@@ -111,12 +142,32 @@ def main() -> None:
 
     dataset: DatasetDict = load_dataset(DATASET_NAME)
 
-    for split_name in dataset.keys():
-        log_message(f"Processing {split_name} split...")
+    # -------------------------------
+    # Process Training Split
+    # -------------------------------
 
-        df = preprocess_split(dataset[split_name].to_pandas())
+    log_message("Processing train split...")
 
-        save_split(df, f"{split_name}.csv")
+    train_df = preprocess_split(
+        dataset["train"].to_pandas()
+    )
+
+    train_df, test_df = split_train_test(train_df)
+
+    save_split(train_df, "train.csv")
+    save_split(test_df, "test.csv")
+
+    # -------------------------------
+    # Process Validation Split
+    # -------------------------------
+
+    log_message("Processing validation split...")
+
+    validation_df = preprocess_split(
+        dataset["validation"].to_pandas()
+    )
+
+    save_split(validation_df, "validation.csv")
 
     log_message("Preprocessing completed successfully.")
 

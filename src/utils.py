@@ -19,7 +19,7 @@ from typing import Iterable
 import numpy as np
 import torch
 
-from config import (
+from src.config import (
     MODELS_DIR,
     OUTPUTS_DIR,
     PROCESSED_DATA_DIR,
