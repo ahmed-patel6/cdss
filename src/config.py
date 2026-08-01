@@ -44,14 +44,14 @@ DATASET_NAME = "tgrex6/mimic-cxr-reports-summarization"
 # Model Configuration
 # ==========================================================
 
-MODEL_NAME = "google/flan-t5-base"
+MODEL_NAME = "facebook/bart-base"
 
 # ==========================================================
 # Tokenization
 # ==========================================================
 
 MAX_INPUT_LENGTH = 512
-MAX_TARGET_LENGTH = 128
+MAX_TARGET_LENGTH = 256
 
 # ==========================================================
 # Training Hyperparameters
