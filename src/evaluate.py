@@ -62,12 +62,14 @@ def postprocess_text(
     return predictions, references
 
 
-def compute_metrics(eval_pred: tuple[np.ndarray, np.ndarray]) -> dict[str, float]:
+def compute_metrics(
+    eval_pred: tuple[np.ndarray, np.ndarray],
+) -> dict[str, float]:
     """
     Compute ROUGE evaluation metrics.
 
-    This function is automatically called by the Hugging Face Trainer
-    during evaluation.
+    This function is automatically called by the Hugging Face
+    Seq2SeqTrainer during evaluation.
 
     Parameters
     ----------
@@ -82,17 +84,31 @@ def compute_metrics(eval_pred: tuple[np.ndarray, np.ndarray]) -> dict[str, float
 
     predictions, labels = eval_pred
 
+    # --------------------------------------------------------------
+    # Handle predictions returned as a tuple
+    # --------------------------------------------------------------
+
     if isinstance(predictions, tuple):
         predictions = predictions[0]
+
+    # --------------------------------------------------------------
+    # Replace invalid negative prediction values
+    # --------------------------------------------------------------
+
+    predictions = np.where(
+        predictions < 0,
+        tokenizer.pad_token_id,
+        predictions,
+    )
 
     # --------------------------------------------------------------
     # Replace ignored label values (-100) with pad token id
     # --------------------------------------------------------------
 
     labels = np.where(
-        labels != -100,
-        labels,
+        labels < 0,
         tokenizer.pad_token_id,
+        labels,
     )
 
     # --------------------------------------------------------------
