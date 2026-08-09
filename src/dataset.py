@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Dict
 
 import pandas as pd
-import torch
 from torch.utils.data import Dataset
 from transformers import AutoTokenizer
 
@@ -57,9 +56,12 @@ class RadiologyDataset(Dataset):
 
         return len(self.data)
 
-    def tokenize_input(self, text: str) -> Dict[str, torch.Tensor]:
+    def tokenize_input(self, text: str) -> Dict[str, list[int]]:
         """
         Tokenize the Findings section.
+
+        The tokenizer returns Python lists rather than PyTorch tensors.
+        The data collator will convert these lists into batched tensors.
         """
 
         return self.tokenizer(
@@ -67,12 +69,14 @@ class RadiologyDataset(Dataset):
             max_length=MAX_INPUT_LENGTH,
             padding="max_length",
             truncation=True,
-            return_tensors="pt",
         )
 
-    def tokenize_target(self, text: str) -> Dict[str, torch.Tensor]:
+    def tokenize_target(self, text: str) -> Dict[str, list[int]]:
         """
         Tokenize the Impression section.
+
+        The tokenizer returns Python lists rather than PyTorch tensors.
+        The data collator will create the final tensors.
         """
 
         return self.tokenizer(
@@ -80,15 +84,24 @@ class RadiologyDataset(Dataset):
             max_length=MAX_TARGET_LENGTH,
             padding="max_length",
             truncation=True,
-            return_tensors="pt",
         )
 
     def __getitem__(
         self,
         idx: int,
-    ) -> Dict[str, torch.Tensor]:
+    ) -> Dict[str, list[int]]:
         """
-        Return one training sample.
+        Return one tokenized training sample.
+
+        Parameters
+        ----------
+        idx : int
+            Index of the requested sample.
+
+        Returns
+        -------
+        Dict[str, list[int]]
+            Tokenized input and target sequences.
         """
 
         findings = self.data.loc[idx, "findings"]
@@ -97,14 +110,10 @@ class RadiologyDataset(Dataset):
 
         model_inputs = self.tokenize_input(findings)
 
-        target = self.tokenize_target(impression)
-
-        labels = target["input_ids"].squeeze(0)
-
-        labels[labels == self.tokenizer.pad_token_id] = -100
+        labels = self.tokenize_target(impression)
 
         return {
-            "input_ids": model_inputs["input_ids"].squeeze(0),
-            "attention_mask": model_inputs["attention_mask"].squeeze(0),
-            "labels": labels,
+            "input_ids": model_inputs["input_ids"],
+            "attention_mask": model_inputs["attention_mask"],
+            "labels": labels["input_ids"],
         }

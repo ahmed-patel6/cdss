@@ -76,13 +76,13 @@ MAX_TARGET_LENGTH = 256
 
 TRAIN_BATCH_SIZE = 4
 
-EVAL_BATCH_SIZE = 4
+EVAL_BATCH_SIZE = 2
 
 LEARNING_RATE = 5e-5
 
 NUM_EPOCHS = 3
 
-GRADIENT_ACCUMULATION_STEPS = 2
+GRADIENT_ACCUMULATION_STEPS = 1
 
 FP16 = True
 
@@ -116,9 +116,24 @@ RANDOM_SEED = 42
 # ==========================================================
 
 NUM_BEAMS = 4
+
+GENERATION_MAX_LENGTH = 256
+
 EARLY_STOPPING = True
 
 
 LOGS_DIR = BASE_DIR / "logs"
+
+# ==========================================================
+# Development / Smoke Test Configuration
+# ==========================================================
+
+SMOKE_TEST = False
+
+SMOKE_TRAIN_SAMPLES = 1000
+
+SMOKE_VALIDATION_SAMPLES = 200
+
+SMOKE_NUM_EPOCHS = 1
 
 
